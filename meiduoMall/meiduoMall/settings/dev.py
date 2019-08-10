@@ -172,10 +172,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
+    'disable_existing_loggers': False,  # 是否禁用已经存在的日志器
+    'formatters': {     # 日执行新显示的格式
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(lineno)d %(message)s'
         },
@@ -183,19 +184,19 @@ LOGGING = {
             'format': '%(levelname)s %(module)s %(lineno)d %(message)s'
         },
     },
-    'filters': {
-        'require_debug_true': {
+    'filters': {    # 对日志进行过滤
+        'require_debug_true': { # django在debug模式下才输出日志
             '()': "django.utils.log.RequireDebugTrue",
         },
     },
-    "handlers": {
-        "console": {
+    "handlers": {   # 日志处理方法
+        "console": {    # 在终端中输出日志
             'level': "INFO",
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': "simple"
         },
-        'file': {
+        'file': {       # 在文件中输出日志
                 'level': 'INFO',
                 'class': 'logging.handlers.RotatingFileHandler',
                 'filename': os.path.join(os.path.dirname(BASE_DIR), 'logs/meiduo.log'),
@@ -204,11 +205,11 @@ LOGGING = {
                 'formatter': 'verbose'
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'propagate': True,
-            'level': "INFO",
+    'loggers': {    # 日志器
+        'django': { # 定义了一个名为djangod的日志器
+            'handlers': ['console', 'file'],    # 可以向终端和日志中同时输出日志
+            'propagate': True,      # 是否进行传递日志
+            'level': "INFO",        # 日志器接收的最低日志级别
         },
     }
 
