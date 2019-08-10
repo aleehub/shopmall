@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-import os
+import os, sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -30,6 +30,13 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+# 追加导包路径
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
+# 打印新的打包路径
+
+# print(sys.path)
+
+# ['F:\\Github\\meiduoMall\\shopmall\\meiduoMall\\meiduoMall\\apps', 'F:\\Github\\meiduoMall\\shopmall\\meiduoMall', 'F:\\Github\\meiduoMall\\shopmall', 'F:\\Github\\meiduoMall\\shopmall\\meiduoMall', 'C:\\Program Files\\JetBrains\\PyCharm 2019.1.3\\helpers\\pycharm_display', 'C:\\Prfogram Files\\Python-Virtual\\shopmall\\Scripts\\python36.zip', 'C:\\Program Files\\Python-Virtual\\shopmall\\DLLs', 'C:\\Program Files\\Python-Virtual\\shopmall\\lib', 'C:\\Program Files\\Python-Virtual\\shopmall\\Scripts', 'c:\\program files\\python36\\Lib', 'c:\\program files\\python36\\DLLs', 'C:\\Program Files\\Python-Virtual\\shopmall', 'C:\\Program Files\\Python-Virtual\\shopmall\\lib\\site-packages', 'C:\\Program Files\\JetBrains\\PyCharm 2019.1.3\\helpers\\pycharm_matplotlib_backend']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -39,8 +46,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'meiduoMall.apps.users',  # 用户模块应用
+    # 'meiduoMall.apps.users',  # 用户模块应用
+    'users',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
