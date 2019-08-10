@@ -111,6 +111,27 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    "default": {  # 默认的redis数据库，采用0号数据库
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": 'django_redis.client.DefaultClient',
+        }
+    },
+    "session": {   #session 状态保持的redis配置项 采用1号数据库
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": 'django_redis.client.DefaultClient',
+        }
+
+    },
+}
+
+# 修改session存储机制 使用redis保存
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "session"
 
 
 # Password validation
