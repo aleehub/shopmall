@@ -14,4 +14,5 @@ class RegisterView(View):
 
     def post(self, request):
         """ 处理POST请求：实现注册逻辑"""
+
         return HttpResponse('这里实现注册逻辑')

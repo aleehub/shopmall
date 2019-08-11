@@ -82,7 +82,7 @@ ROOT_URLCONF = 'meiduoMall.urls'
 # 修改成配置jinja2模板引擎
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.jinja2.Jinja2',
+        'BACKEND': 'django.template.backends.jinja2.Jinja2',  # jinja2模板引擎
         'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -92,9 +92,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
-
-            # 补充jinjia2模板引擎环境
-            "environment": 'meiduoMall.utils.jinjia2_env.jinjia2_environment'
+            # 补充Jinja2模板引擎环境
+            'environment': 'meiduoMall.utils.jinja2_env.jinja2_environment',
         },
     },
 ]
