@@ -48,6 +48,7 @@ INSTALLED_APPS = [
 
     # 'meiduoMall.apps.users',  # 用户模块应用
     'users',
+    'contents',
 ]
 
 

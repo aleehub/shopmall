@@ -5337,7 +5337,7 @@
         'button,datalist,fieldset,form,input,label,legend,meter,optgroup,option,' +
         'output,progress,select,textarea,' +
         'details,dialog,menu,menuitem,summary,' +
-        'content,element,shadow,template,blockquote,iframe,tfoot'
+        'contents,element,shadow,template,blockquote,iframe,tfoot'
     );
 
 // this map is intentionally selective, only covering SVG elements that may
@@ -5840,7 +5840,7 @@
                     ancestor = ancestor.parent;
                 }
             }
-            // for slot content they should also get the scopeId from the host instance.
+            // for slot contents they should also get the scopeId from the host instance.
             if (isDef(i = activeInstance) &&
                 i !== vnode.context &&
                 i !== vnode.fnContext &&
@@ -6239,7 +6239,7 @@
                 } else {
                     if (isRealElement) {
                         // mounting to a real element
-                        // check if this is server-rendered content and if we can perform
+                        // check if this is server-rendered contents and if we can perform
                         // a successful hydration.
                         if (oldVnode.nodeType === 1 && oldVnode.hasAttribute(SSR_ATTR)) {
                             oldVnode.removeAttribute(SSR_ATTR);
@@ -6252,7 +6252,7 @@
                             } else {
                                 warn(
                                     'The client-side rendered virtual DOM tree is not matching ' +
-                                    'server-rendered content. This is likely caused by incorrect ' +
+                                    'server-rendered contents. This is likely caused by incorrect ' +
                                     'HTML markup, for example nesting block-level elements inside ' +
                                     '<p>, or missing <tbody>. Bailing hydration and performing ' +
                                     'full client-side render.'
@@ -9027,7 +9027,7 @@
         var last, lastTag;
         while (html) {
             last = html;
-            // Make sure we're not in a plaintext content element like scripts/style
+            // Make sure we're not in a plaintext contents element like scripts/style
             if (!lastTag || !isPlainTextElement(lastTag)) {
                 var textEnd = html.indexOf('<');
                 if (textEnd === 0) {
@@ -9893,7 +9893,7 @@
         return map
     }
 
-// for scripts (e.g. type="x/template") or style, do not decode content
+// for scripts (e.g. type="x/template") or style, do not decode contents
     function isTextTag(el) {
         return el.tag === 'script' || el.tag === 'style'
     }
@@ -10105,9 +10105,9 @@
     function markStatic$1(node) {
         node.static = isStatic(node);
         if (node.type === 1) {
-            // do not make component slot content static. this avoids
+            // do not make component slot contents static. this avoids
             // 1. components not able to mutate slot nodes
-            // 2. static slot content fails for hot-reloading
+            // 2. static slot contents fails for hot-reloading
             if (
                 !isPlatformReservedTag(node.tag) &&
                 node.tag !== 'slot' &&
@@ -11133,7 +11133,7 @@
 
 // #3663: IE encodes newlines inside attribute values while other browsers don't
     var shouldDecodeNewlines = inBrowser ? getShouldDecode(false) : false;
-// #6828: chrome encodes content in a[href]
+// #6828: chrome encodes contents in a[href]
     var shouldDecodeNewlinesForHref = inBrowser ? getShouldDecode(true) : false;
 
     /*  */
