@@ -19,5 +19,6 @@ from . import views
 
 urlpatterns = [
 
-    url(r'^register/$', views.RegisterView.as_view())
+    # 注册
+    url(r'^register/$', views.RegisterView.as_view(), name='register')
 ]
