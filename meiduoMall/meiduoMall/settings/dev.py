@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     # 'meiduoMall.apps.users',  # 用户模块应用
     'users',
     'contents',
+
+    # 'verifications',  未迁移模型类 ，可先不用注册
 ]
 
 
@@ -138,6 +140,13 @@ CACHES = {
             "CLIENT_CLASS": 'django_redis.client.DefaultClient',
         }
 
+    },
+    "verify_code": {  # 将验证码保存在redis二号数据库
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": 'django_redis.client.DefaultClient',
+        }
     },
 }
 
