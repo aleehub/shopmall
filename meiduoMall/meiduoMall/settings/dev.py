@@ -152,6 +152,8 @@ CACHES = {
 
 # 修改session存储机制 使用redis保存
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+
+# 将session的默认配置改成session配置
 SESSION_CACHE_ALIAS = "session"
 
 

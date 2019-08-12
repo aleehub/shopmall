@@ -1,0 +1,2 @@
+# 验证码过期值
+IMAGE_CODE_REDIS_EXPIRES = 300
