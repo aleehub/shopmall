@@ -1,2 +1,9 @@
-# 验证码过期值
+# 图片验证码过期值
 IMAGE_CODE_REDIS_EXPIRES = 300
+
+# 短信验证码过期值
+SMS_CODE_REDIS_EXPIRES = 300
+
+# 短信验证码发送模板
+
+SEND_SMS_TEMPLATE_ID = 1
