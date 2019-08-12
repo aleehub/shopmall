@@ -21,10 +21,10 @@ class ImageCodeView(View):
         # name : 唯一标识
         # text:  验证码文本
         # image: 验证码图片
-
         # 生成图片验证码
         name, text, image = captcha.generate_captcha()
 
+        # 连接redis
         # 保存图片验证码
 
         # redis_conn = redis.get_redis_connection('verify_code')
@@ -32,5 +32,5 @@ class ImageCodeView(View):
         # redis_conn.setex('img_%s'%uuid, constants.IMAGE_CODE_REDIS_EXPIRES, text)
 
         # 响应图片验证码
-
-        return HttpResponse(image, content_type='image/jpg')
+        # 响应体类型 MIME
+        return HttpResponse(image, content_type='image/jpg')  # 不设置响应体类型，则默认网页类型
