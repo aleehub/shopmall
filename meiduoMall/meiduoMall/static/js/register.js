@@ -65,6 +65,7 @@ var vm = new Vue({
                 this.error_name = true;
             }
             // 检查重名
+            // 通过异步传输，局部查询是否同名
             if (this.error_name == false) {
                 var url = this.host + '/usernames/' + this.username + '/count/';
                 axios.get(url, {

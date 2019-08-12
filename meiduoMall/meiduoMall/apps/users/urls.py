@@ -20,5 +20,10 @@ from . import views
 urlpatterns = [
 
     # 注册
-    url(r'^register/$', views.RegisterView.as_view(), name='register')
+    url(r'^register/$', views.RegisterView.as_view(), name='register'),
+
+    # URL路径命名查询参数：英文问号加大写P，后面采用正则表达式
+    url(r'^usernames/(?P<username>[a-zA-Z0-9_-]{5,20})/count/', views.UsernameCountView.as_view()),
+    # URL路径命名查询参数：英文问号加大写P，后面采用正则表达式
+    url(r'^mobiles/(?P<mobile>1[3-9]\d{9})/count/', views.MobileCountView.as_view())
 ]
