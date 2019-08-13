@@ -74,7 +74,6 @@ class SMSCodeView(View):
 
         # 获取请求对象中的参数
         image_code_client = req_dict.get("image_code")
-
         uuid = req_dict.get("uuid")
 
         # 校验获得的参数
@@ -111,7 +110,6 @@ class SMSCodeView(View):
             return JsonResponse({"code": RETCODE.IMAGECODEERR, "errmsg": "图形验证码失效"})
 
         # 删除在redis中的图形验证码
-
         redis_conn.delete("img_%s" % uuid)
 
         # 对比两边的验证码是否相同
@@ -124,14 +122,13 @@ class SMSCodeView(View):
             return JsonResponse({"code": RETCODE.IMAGECODEERR, "errmsg": "图形验证码错误"})
 
         # 生成短信验证码：生成6位数验证码
-
         sms_code = '%06d' % random.randint(0, 999999)
 
         logger.info(sms_code)
 
         # 保存短信验证码
 
-        # redis_conn.setex("sms_%s" % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
+        # redis_conn.setex("sms_%s" % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)  下面利用管道技术
 
         # 解决如果redis服务端需要同时处理多个请求,加上网络延迟，那么服务端利用率不高，效率降低
 
