@@ -86,6 +86,21 @@ class SMSCodeView(View):
         # 创建到redis的连接对象
         redis_conn = get_redis_connection('verify_code')
 
+        # 提取，校验send_flag
+
+        # 先从redis数据库中先提取是否有这个标记，如果没有则可以发送短信
+        send_flag = redis_conn.get('send_flag_%s' % mobile)
+
+        if send_flag:
+            return JsonResponse({'code': RETCODE.THROTTLINGERR, 'errmsg': '发送短信过于频繁'})
+
+        # 没有标记，重新写入
+        # 设置参数说明：
+        # 第一个值：键名称
+        # 第二个值：键存活时间
+        # 第三个值：设置一个随便值
+        redis_conn.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
+
         # 提取图形验证码
         image_code_redis = redis_conn.get('img_%s' % uuid)
 
@@ -131,7 +146,7 @@ class SMSCodeView(View):
         result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60],
                                          constants.SEND_SMS_TEMPLATE_ID)
 
-        print(result)
+        print('发送结果:', result)
 
         # 响应结果
 

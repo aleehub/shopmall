@@ -7,3 +7,6 @@ SMS_CODE_REDIS_EXPIRES = 300
 # 短信验证码发送模板
 
 SEND_SMS_TEMPLATE_ID = 1
+
+# 短信短时间内发送标记过期值
+SEND_SMS_CODE_INTERVAL = 60
