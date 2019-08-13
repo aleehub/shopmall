@@ -99,7 +99,7 @@ class SMSCodeView(View):
         # 第一个值：键名称
         # 第二个值：键存活时间
         # 第三个值：设置一个随便值
-        redis_conn.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
+        # redis_conn.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)  下面利用管道技术
 
         # 提取图形验证码
         image_code_redis = redis_conn.get('img_%s' % uuid)
@@ -131,7 +131,24 @@ class SMSCodeView(View):
 
         # 保存短信验证码
 
-        redis_conn.setex("sms_%s" % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
+        # redis_conn.setex("sms_%s" % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
+
+        # 解决如果redis服务端需要同时处理多个请求,加上网络延迟，那么服务端利用率不高，效率降低
+
+        # 利用管道技术pipeline
+
+        # 创建Redis管道
+        pl = redis_conn.pipeline()
+
+        # 将redis队列添加进入队列
+        pl.setex('send_flag_%s' % mobile, constants.SEND_SMS_CODE_INTERVAL, 1)
+
+        pl.setex("sms_%s" % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)
+
+        # 执行请求
+        pl.execute()
+
+        #
 
         # 调用发送短信SDK进行发送短信
 
