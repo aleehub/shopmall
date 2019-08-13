@@ -16,6 +16,8 @@ import random
 
 import logging
 
+from celery_tasks.sms.tasks import ccp_send_sms_code
+
 from meiduoMall.libs.yuntongxun.sms import CCP
 
 logger = logging.getLogger()
@@ -157,11 +159,14 @@ class SMSCodeView(View):
 
         mobile = '15919440309'
 
-        result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60],
-                                         constants.SEND_SMS_TEMPLATE_ID)
+        # result = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES // 60],
+        #                                  constants.SEND_SMS_TEMPLATE_ID)
+        #
+        # print('发送结果:', result)   改用异步传输
 
-        print('发送结果:', result)
+        result = ccp_send_sms_code.delay(mobile, sms_code)
+
+        print(result)
 
         # 响应结果
-
         return JsonResponse({"code": RETCODE.OK, "errmsg": "发送短信成功"})
