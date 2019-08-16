@@ -23,11 +23,13 @@ urlpatterns = [
     url(r'^register/$', views.RegisterView.as_view(), name='register'),
 
     # URL路径命名查询参数：英文问号加大写P，后面采用正则表达式
+    # 用户名重复查询
     url(r'^usernames/(?P<username>[a-zA-Z0-9_-]{5,20})/count/', views.UsernameCountView.as_view()),
 
     # URL路径命名查询参数：英文问号加大写P，后面采用正则表达式
+    # 手机号重复查询
     url(r'^mobiles/(?P<mobile>1[3-9]\d{9})/count/', views.MobileCountView.as_view()),
 
     # 登录界面
-    url(r'^login/$', views.LoginView.as_view())
+    url(r'^login/$', views.LoginView.as_view(), name='login')
 ]

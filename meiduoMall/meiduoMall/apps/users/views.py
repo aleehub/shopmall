@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, logout
+from .utils import UsernameMobileAuthBackend
 from django.urls import reverse
 
 from .models import User
@@ -167,7 +168,7 @@ class LoginView(View):
 
         # 认证登录用户
 
-        user = authenticate(username=username, password=password)
+        user = UsernameMobileAuthBackend.authenticate(username=username, password=password)
 
         if user is None:
             return render(request, 'login.html', {'account_errmsg': '用户名或密码错误'})
@@ -185,4 +186,11 @@ class LoginView(View):
 
         # 响应登录结果
 
-        return redirect(reverse('contents:index'))
+        # return redirect(reverse('contents:index'))  实现首页显示登录名，此处要将用户名等信息写出cookie
+
+        response = redirect(reverse('contents:index'))
+
+        # 登录时用户名写入cookie，有效期14天
+        response.set_cookie('usename', username, max_age=3600 * 24 * 14)
+
+        return response
