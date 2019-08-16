@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse
 
 from .models import User
@@ -134,3 +134,55 @@ class MobileCountView(View):
         count = User.objects.filter(mobile=mobile).count()
 
         return JsonResponse({"count": count})
+
+
+class LoginView(View):
+    """ 用户名登录"""
+
+    def get(self, request):
+
+        """
+        提供登录界面
+        :param request: 请求对象
+        :return: 登录界面
+        """
+
+        return render(request, "login.html")
+
+    def post(self, request):
+
+        """
+        实现登录逻辑
+        :param request: 请求对象
+        :return:  登录结果
+        """
+
+        # 接收参数
+
+        username = request.POST.get('username')
+
+        password = request.POST.get('password')
+
+        remembered = request.POST.get('remembered')
+
+        # 认证登录用户
+
+        user = authenticate(username=username, password=password)
+
+        if user is None:
+            return render(request, 'login.html', {'account_errmsg': '用户名或密码错误'})
+
+        # 实现登录状态保持
+
+        login(request, user)
+
+        # 设置状态保持的周期
+
+        if remembered != 'on':
+            # 没有记住用户： 浏览器会话结束就过期，默认是两周
+
+            request.session.set_expiry(0)
+
+        # 响应登录结果
+
+        return redirect(reverse('contents:index'))
