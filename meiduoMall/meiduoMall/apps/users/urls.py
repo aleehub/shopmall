@@ -31,5 +31,8 @@ urlpatterns = [
     url(r'^mobiles/(?P<mobile>1[3-9]\d{9})/count/', views.MobileCountView.as_view()),
 
     # 登录界面
-    url(r'^login/$', views.LoginView.as_view(), name='login')
+    url(r'^login/$', views.LoginView.as_view(), name='login'),
+
+    # 退出登录状态
+    url(r'^logout/$', views.Logout.as_view(), name='logout')
 ]
