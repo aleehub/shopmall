@@ -4,10 +4,9 @@ from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.contrib.auth import login, logout
 from .utils import UsernameMobileAuthBackend
 from django.urls import reverse
-
 from .models import User
-
 import re
+from django.contrib.auth import mixins
 
 
 # Create your views here.
@@ -184,14 +183,23 @@ class LoginView(View):
 
             request.session.set_expiry(0)
 
-        # 响应登录结果
+        next = request.GET.get('next')
 
-        # return redirect(reverse('contents:index'))  实现首页显示登录名，此处要将用户名等信息写出cookie
+        if next:
 
-        response = redirect(reverse('contents:index'))
+            response = redirect(next)
 
-        # 登录时用户名写入cookie，有效期14天
-        response.set_cookie('usename', username, max_age=3600 * 24 * 14)
+
+        else:
+            # 响应登录结果
+
+            # return redirect(reverse('contents:index'))  实现首页显示登录名，此处要将用户名等信息写出cookie
+
+            response = redirect(reverse('contents:index'))
+
+            # 登录时用户名写入cookie，有效期14天
+            response.set_cookie('usename', username, max_age=3600 * 24 * 14)
+
 
         return response
 
@@ -213,19 +221,28 @@ class Logout(View):
         return response
 
 
-class UserInfoView(View):
-    """用户中心,当用户登录才能访问用户中心"""
+# class UserInfoView(View):
+#     """用户中心,当用户登录才能访问用户中心"""
+#
+#     def get(self, request):
+#         """提供个人信息界面"""
+#
+#         # is_authenticated django用户认证系统提供了方法request.user.is_authenticated()来判断用户是否登录
+#         # 如果通过则返回True ,否则返回false
+#         # 缺点，登录验证逻辑很多地方都需要，所以该代码需要重复编码好多次
+#         # if request.user.is_authenticated():
+#         #     return render(request, 'user_center_info.html')
+#         #
+#         # else:
+#         #     return redirect(reverse("users:login"))
+#
+#         return render(request, 'user_center_info.html')
+#
+
+class UserInfoView(mixins.LoginRequiredMixin, View):
+    """验证用户是否登录扩展类**"""
 
     def get(self, request):
         """提供个人信息界面"""
-
-        # is_authenticated django用户认证系统提供了方法request.user.is_authenticated()来判断用户是否登录
-        # 如果通过则返回True ,否则返回false
-        # 缺点，登录验证逻辑很多地方都需要，所以该代码需要重复编码好多次
-        # if request.user.is_authenticated():
-        #     return render(request, 'user_center_info.html')
-        #
-        # else:
-        #     return redirect(reverse("users:login"))
 
         return render(request, 'user_center_info.html')

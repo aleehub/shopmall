@@ -43,5 +43,8 @@ urlpatterns = [
     # 逻辑，如果用户登录了，则进入到视图内部，执行视图逻辑
     # 如果未通过登录，则重定向到LOGIN_URL配置项指定的地址
     # LOGIN_URL 配置在django全局配置文件里
-    url(r'^info/$', login_required(views.UserInfoView.as_view()), name='info')
+    # login_required()里在URL路径里面集成了next参数，参数值如果没通过验证要去往的路径
+    # url(r'^info/$', login_required(views.UserInfoView.as_view()), name='info')
+
+    url(r'^info/$', views.UserInfoView.as_view(), name='info')  # 此时采用在类里继承父类验证类
 ]
