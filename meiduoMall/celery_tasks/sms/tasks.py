@@ -5,7 +5,7 @@ from meiduoMall.apps.verifications import constants
 
 # name : 异步任务别名
 @celery_app.task(name='cpp_send_sms_code')
-def ccp_send_sms_code(self, mobile, sms_code):
+def ccp_send_sms_code(mobile, sms_code):  # 此处不是类，没有self参数
     """
     发送短信异步任务
     :param self:

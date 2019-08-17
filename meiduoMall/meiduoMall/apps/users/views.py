@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
-from django.contrib.auth import login, logout
-from .utils import UsernameMobileAuthBackend
+from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse
 from .models import User
 import re
 from django.contrib.auth import mixins
+from django.conf import settings
 
 
 # Create your views here.
@@ -86,8 +86,12 @@ class RegisterView(View):
         login(request, user)
 
         # 响应注册结果
-        return redirect(reverse("contents:index"))
-
+        # return redirect(reverse("contents:index"))
+        response = redirect('/')  # 创建好响应对象
+        # setting 中的SESSION_COOKIE_AGE值在global.setting中，默认为两周
+        response.set_cookie('username', user.username, max_age=settings.SESSION_COOKIE_AGE)
+        # merge_cart_cookie_to_redis(request, response)
+        return response
 
 class UsernameCountView(View):
     """查询用户名重复识视图"""
@@ -167,7 +171,7 @@ class LoginView(View):
 
         # 认证登录用户
 
-        user = UsernameMobileAuthBackend.authenticate(username=username, password=password)
+        user = authenticate(username=username, password=password)
 
         if user is None:
             return render(request, 'login.html', {'account_errmsg': '用户名或密码错误'})
@@ -185,21 +189,22 @@ class LoginView(View):
 
         next = request.GET.get('next')
 
-        if next:
+        # if next:
+        #
+        #     response = redirect(next)
+        #
+        #
+        # else:
+        #     # 响应登录结果
+        #
+        #     # return redirect(reverse('contents:index'))  实现首页显示登录名，此处要将用户名等信息写出cookie
+        #
+        #     response = redirect(reverse('contents:index'))
 
-            response = redirect(next)
+        response = redirect(next or "/")
 
-
-        else:
-            # 响应登录结果
-
-            # return redirect(reverse('contents:index'))  实现首页显示登录名，此处要将用户名等信息写出cookie
-
-            response = redirect(reverse('contents:index'))
-
-            # 登录时用户名写入cookie，有效期14天
-            response.set_cookie('usename', username, max_age=3600 * 24 * 14)
-
+        # 登录时用户名写入cookie，有效期14天
+        response.set_cookie('username', username, max_age=3600 * 24 * 14)
 
         return response
 
