@@ -13,7 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url, include
+from django.conf.urls import url
 from django.contrib.auth.decorators import login_required
 
 from . import views
@@ -38,5 +38,10 @@ urlpatterns = [
     url(r'^logout/$', views.Logout.as_view(), name='logout'),
 
     # 用户中心
-    url(r'^info/$', views.UserInfoView.as_view(), name='info')
+    # login_required()装饰器，判断用户是否登录
+    # 内部封装了is_authenticated()函数
+    # 逻辑，如果用户登录了，则进入到视图内部，执行视图逻辑
+    # 如果未通过登录，则重定向到LOGIN_URL配置项指定的地址
+    # LOGIN_URL 配置在django全局配置文件里
+    url(r'^info/$', login_required(views.UserInfoView.as_view()), name='info')
 ]

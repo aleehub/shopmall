@@ -222,8 +222,10 @@ class UserInfoView(View):
         # is_authenticated django用户认证系统提供了方法request.user.is_authenticated()来判断用户是否登录
         # 如果通过则返回True ,否则返回false
         # 缺点，登录验证逻辑很多地方都需要，所以该代码需要重复编码好多次
-        if request.user.is_authenticated():
-            return render(request, 'user_center_info.html')
+        # if request.user.is_authenticated():
+        #     return render(request, 'user_center_info.html')
+        #
+        # else:
+        #     return redirect(reverse("users:login"))
 
-        else:
-            return redirect(reverse("users:login"))
+        return render(request, 'user_center_info.html')
