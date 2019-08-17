@@ -7,3 +7,5 @@ class QQAuthURLView(View):
 
     def get(self):
         pass
+
+# TODO: "开始做QQ登录"
