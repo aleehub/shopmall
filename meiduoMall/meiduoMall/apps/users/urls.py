@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.contrib.auth.decorators import login_required
 
 from . import views
 
@@ -34,5 +35,8 @@ urlpatterns = [
     url(r'^login/$', views.LoginView.as_view(), name='login'),
 
     # 退出登录状态
-    url(r'^logout/$', views.Logout.as_view(), name='logout')
+    url(r'^logout/$', views.Logout.as_view(), name='logout'),
+
+    # 用户中心
+    url(r'^info/$', views.UserInfoView.as_view(), name='info')
 ]
