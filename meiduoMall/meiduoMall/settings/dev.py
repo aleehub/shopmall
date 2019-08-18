@@ -252,4 +252,6 @@ LOGIN_URL = '/login/'
 # qq登录模块参数
 QQ_CLIENT_ID = '101518219'
 QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
+
+# 因为此时回调地址为一个域名，而这个域名是个假域名,因此需要到本地host文件中将域名映射到本地ip
 QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'  # 回调地址

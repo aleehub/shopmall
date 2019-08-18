@@ -1,12 +1,16 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseServerError
 from django.shortcuts import render
 from django.views import View
+
 # 导入qq登录模块工具包
-from QQLoginTool.QQtool import OAuthQQ
+from QQLoginTool.QQtool import OAuthQQ  #
+
 from django.conf import settings
 from meiduoMall.utils.response_code import RETCODE
 from django.http import HttpResponseForbidden
+import logging
 
+logger = logging.getLogger('django')
 
 class QQAuthURLView(View):
     """提供QQ登录页面网址"""
@@ -35,5 +39,23 @@ class QQAuthUserView(View):
         if not code:
             return HttpResponseForbidden("缺少code")
 
-        pass
+        # 创建工具对象
 
+        oauth = OAuthQQ(client_id=settings.QQ_CLIENT_ID, client_secret=settings.QQ_CLIENT_SECRET,
+                        redirect_uri=settings.QQ_REDIRECT_URI, state=True)
+
+        try:
+
+            # 使用code向QQ服务器请求access_token
+
+            access_token = oauth.get_access_token(code)
+
+            # 使用access_token向QQ服务器请求openid
+            openid = oauth.get_open_id(access_token)
+
+        except Exception as e:
+            logger.error(e)
+
+            return HttpResponseServerError("OAuth2.0认证失败")
+
+        pass
