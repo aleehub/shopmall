@@ -250,4 +250,13 @@ class UserInfoView(mixins.LoginRequiredMixin, View):
     def get(self, request):
         """提供个人信息界面"""
 
-        return render(request, 'user_center_info.html')
+        # 为了方便实现用户添加邮箱时的局部刷新
+        # 后端渲染的模板数据再传给vue.js
+        # 将后端提供的数据传入到user_center_info.js中
+        context = {
+            'username': request.user.username,
+            'mobile': request.user.mobile,
+            'email': request.user.email,
+            'email_active': request.user.email_active
+        }
+        return render(request, 'user_center_info.html', context=context)
