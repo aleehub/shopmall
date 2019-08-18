@@ -13,22 +13,15 @@ def get_user_by_account(account):
     """
 
     try:
-        if re.match('^1[3-9]\d{9}%', account):
+        if re.match('^1[3-9]\d{9}$', account):  # 此处结尾符书写错误，导致不能多用户登录
             # 手机号
             user = User.objects.get(mobile=account)
-
         else:
-
             # 用户名登录
-
             user = User.objects.get(username=account)
-
     except User.DoesNotExist:
-
         return None
-
     else:
-
         return user
 
 

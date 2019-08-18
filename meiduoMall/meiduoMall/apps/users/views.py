@@ -210,7 +210,8 @@ class LoginView(View):
         response = redirect(next or "/")
 
         # 登录时用户名写入cookie，有效期14天
-        response.set_cookie('username', username, max_age=(None if remembered is None else settings.SESSION_COOKIE_AGE))
+        response.set_cookie('username', user.username,
+                            max_age=(None if remembered is None else settings.SESSION_COOKIE_AGE))
 
         return response
 
