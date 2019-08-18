@@ -25,7 +25,8 @@ SECRET_KEY = '4&46e_c0omctt72p*zab#@a%*wci&^9t#y$dct(qx0p(0f&lin'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# 此项设置代表允许访问的域名地址
+ALLOWED_HOSTS = ['www.meiduo.com']
 
 
 # Application definition
@@ -247,3 +248,8 @@ AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileAuthBackend']
 
 LOGIN_URL = '/login/'
+
+# qq登录模块参数
+QQ_CLIENT_ID = '101518219'
+QQ_CLIENT_SECRET = '418d84ebdc7241efb79536886ae95224'
+QQ_REDIRECT_URI = 'http://www.meiduo.site:8000/oauth_callback'  # 回调地址

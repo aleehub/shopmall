@@ -22,3 +22,5 @@ if __name__ == "__main__":
             )
         raise
     execute_from_command_line(sys.argv)
+
+#   manage管理器启动参数:runserver www.meiduo.com:8000

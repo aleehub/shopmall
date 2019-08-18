@@ -24,4 +24,4 @@
 # 如何启动celery
 
 # 在终端输入
-# celery -A celery_tasks.main worker -l info
+# celery -A celery_tasks.main worker -l info -P eventlet
