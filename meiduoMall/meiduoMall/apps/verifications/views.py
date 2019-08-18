@@ -128,6 +128,8 @@ class SMSCodeView(View):
 
         logger.info(sms_code)
 
+        print(f"此时生成的短信验证码是：{sms_code}")
+
         # 保存短信验证码
 
         # redis_conn.setex("sms_%s" % mobile, constants.SMS_CODE_REDIS_EXPIRES, sms_code)  下面利用管道技术
@@ -164,9 +166,9 @@ class SMSCodeView(View):
         #
         # print('发送结果:', result)   改用异步传输
 
-        result = ccp_send_sms_code.delay(mobile, sms_code)
+        # result = ccp_send_sms_code.delay(mobile, sms_code)
 
-        print(result)
+        # print(result)
 
         # 响应结果
         return JsonResponse({"code": RETCODE.OK, "errmsg": "发送短信成功"})
