@@ -46,5 +46,8 @@ urlpatterns = [
     # login_required()里在URL路径里面集成了next参数，参数值如果没通过验证要去往的路径
     # url(r'^info/$', login_required(views.UserInfoView.as_view()), name='info')
 
-    url(r'^info/$', views.UserInfoView.as_view(), name='info')  # 此时采用在类里继承父类验证类
+    url(r'^info/$', views.UserInfoView.as_view(), name='info'),  # 此时采用在类里继承父类验证类
+
+    url(r'^emails/$', views.EmailView.as_view(), name='emails')  # 此时采用在类里继承父类验证类
+
 ]

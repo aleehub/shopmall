@@ -1,12 +1,17 @@
+import json
+
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse
+
+from meiduoMall.utils.response_code import RETCODE
 from .models import User
 import re
 from django.contrib.auth import mixins
 from django.conf import settings
+from meiduoMall.utils.views import LoginRequiredView
 
 
 # Create your views here.
@@ -260,3 +265,41 @@ class UserInfoView(mixins.LoginRequiredMixin, View):
             'email_active': request.user.email_active
         }
         return render(request, 'user_center_info.html', context=context)
+
+
+class EmailView(LoginRequiredView, View):
+    """增加邮箱后端逻辑实现"""
+
+    def put(self, request):
+        """实现添加邮箱逻辑"""
+        # 接收参数
+        json_dict = json.loads(request.body.decode())
+
+        email = json_dict.get('email')
+
+        # 校验参数
+
+        # 先判断有没有邮箱
+        if not email:
+            return JsonResponse({'code': RETCODE.NECESSARYPARAMERR, 'errmsg': '缺少email参数'})
+
+        if not re.match(r'^[a-z0-9][\w\.\-]*@[a-z0-9\-]+(\.[a-z]{2,5}){1,2}$', email):
+            return JsonResponse({'code': RETCODE.EMAILERR, 'errmsg': '邮箱格式错误'})
+
+        # 获取登录用户
+        user = request.user
+
+        # 修改email
+
+        # User.objects.filter(username=user.username, email='').update(email=email)
+        # 两种修改方式
+        user.email = email
+        user.save()
+
+        # 发送邮件
+
+        #  TODO:发送邮件
+
+        # 响应 添加邮箱结果
+
+        return JsonResponse({'code': RETCODE.OK, 'errmsg': "添加邮箱成功"})
