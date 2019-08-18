@@ -3,7 +3,8 @@ import json
 # from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.views.generic import View
-from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse, HttpResponseBadRequest, \
+    HttpResponseServerError
 from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse
 
@@ -15,7 +16,11 @@ from django.conf import settings
 from meiduoMall.utils.views import LoginRequiredView
 from celery_tasks.email.tasks import send_verify_email
 
-from .utils import generate_email_verify_url
+from .utils import generate_email_verify_url, check_email_verify_url
+import logging
+
+logger = logging.getLogger('django')
+
 
 # Create your views here.
 
@@ -320,3 +325,38 @@ class EmailView(LoginRequiredView, View):
         # 响应 添加邮箱结果
 
         return JsonResponse({'code': RETCODE.OK, 'errmsg': "添加邮箱成功"})
+
+
+class VerifyEmailView(LoginRequiredView, View):
+
+    def get(self, request):
+
+        # 接收参数
+        token = request.GET.get("token")
+
+        # 校验参数: 判断token是否为空和过期， 提取user
+
+        if not token:
+            return HttpResponseBadRequest('缺少token')
+
+        user = check_email_verify_url(token)
+
+        if user is None:
+            return HttpResponseForbidden('无效的token')
+
+        # 修改email_active的值为True
+
+        try:
+
+            user.email_active = True
+            user.save()
+
+        except Exception as e:
+
+            logger.error(e)
+
+            return HttpResponseServerError('激活邮件失败')
+
+        # 返回邮件验证结果
+
+        return redirect(reverse('users:info'))

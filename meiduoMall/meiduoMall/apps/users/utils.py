@@ -74,6 +74,7 @@ def check_email_verify_url(token):
     :return: user or None
     """
     serializer = Serializer(settings.SECRET_KEY, 3600 * 24)
+
     try:
         data = serializer.loads(token)
         user_id = data.get('user_id')
