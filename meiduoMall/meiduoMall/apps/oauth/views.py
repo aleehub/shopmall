@@ -1,5 +1,5 @@
 from django.http import JsonResponse, HttpResponseServerError
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
 
 # 导入qq登录模块工具包
@@ -11,6 +11,8 @@ from .models import OAuthQQUser
 from meiduoMall.utils.response_code import RETCODE
 from django.http import HttpResponseForbidden
 import logging
+from django.contrib.auth import login
+from .utils import generate_openid_signature, check_openid_signature
 
 logger = logging.getLogger('django')
 
@@ -25,6 +27,7 @@ class QQAuthURLView(View):
         # 获取QQ登录页面网址
         oauth = OAuthQQ(client_id=settings.QQ_CLIENT_ID, client_secret=settings.QQ_CLIENT_SECRET,
                         redirect_uri=settings.QQ_REDIRECT_URI, state=True)
+
         login_url = oauth.get_qq_url()
 
         return JsonResponse({"code": RETCODE.OK, 'errmsg': 'OK', 'login_url': login_url})
@@ -63,15 +66,29 @@ class QQAuthUserView(View):
         else:
 
             try:
-                oauth_user = OAuthQQUser.object.get(openid=openid)
+                oauth_user = OAuthQQUser.objects.get(openid=openid)
 
             except OAuthQQUser.DoesNotExist:
 
                 # 如果openid没绑过美多商城用户
-
-                pass
+                openid = generate_openid_signature(openid)
+                context = {'openid': openid}
+                return render(request, 'oauth_callback.html', context)
 
             else:
 
                 # 如果已经绑定过美多商城用户
-                pass
+                qq_user = oauth_user.user
+                login(request, qq_user)
+
+                # 响应结果
+
+                # 获取界面跳转来源
+                next = request.GET.get('state')
+
+                response = redirect(next)
+
+                # 登录时用户名写入到cookie，有效期15天
+                response.set_cookie('username', qq_user.username, max_age=3600 * 24 * 14)
+
+                return response
