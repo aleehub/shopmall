@@ -1,5 +1,6 @@
 import json
 
+# from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.views.generic import View
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
@@ -12,7 +13,7 @@ import re
 from django.contrib.auth import mixins
 from django.conf import settings
 from meiduoMall.utils.views import LoginRequiredView
-
+from celery_tasks.email.tasks import send_verify_email
 
 # Create your views here.
 
@@ -277,6 +278,8 @@ class EmailView(LoginRequiredView, View):
 
         email = json_dict.get('email')
 
+        print(email)
+
         # 校验参数
 
         # 先判断有没有邮箱
@@ -298,7 +301,18 @@ class EmailView(LoginRequiredView, View):
 
         # 发送邮件
 
-        #  TODO:发送邮件
+        verify_email = '邮箱验证链接'
+
+        # subject = "美多商城邮箱验证"
+        # html_message = '<p>尊敬的用户您好！</p>' \
+        #                '<p>感谢您使用美多商城。</p>' \
+        #                '<p>您的邮箱为：%s 。请点击此链接激活您的邮箱：</p>' \
+        #                '<p><a href="%s">%s<a></p>' % (email, verify_email, verify_email)
+        #
+        # send_mail(subject, "", settings.EMAIL_FROM, [email], html_message=html_message)
+
+        send_verify_email.delay(email, verify_email)
+
 
         # 响应 添加邮箱结果
 

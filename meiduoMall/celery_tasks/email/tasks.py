@@ -10,7 +10,7 @@ logger = logging.getLogger('django')
 # name: 异步任务别名
 # retry_backoff: 异常自动重试的时间间隔 第n次(retry_backoff*2(n-1))s
 # max_retries: 异常自动重试次数的上限
-@celery_app.task(bind=True, name='send_verify_email', retry_backoff=3)
+@celery_app.task(name='send_verify_email')  # bind坑了我 , 对任务队列的task参数不了解
 def send_verify_email(to_email, verify_url):
     """
 
@@ -27,7 +27,7 @@ def send_verify_email(to_email, verify_url):
                    '<p><a href="%s">%s<a></p>' % (to_email, verify_url, verify_url)
 
     try:
-        send_mail(subject, "", settings.EMAIL, [to_email], html_message=html_message)
+        send_mail(subject, "", settings.EMAIL_FROM, [to_email], html_message=html_message)  # 参数书写错误
     except Exception as e:
         logger.error(e)
 
