@@ -263,3 +263,6 @@ EMAIL_HOST = 'smtp.163.com'  # 发邮件主机
 EMAIL_HOST_USER = 'doomer_543d@163.com'  # 授权的邮箱
 EMAIL_HOST_PASSWORD = 'lyh123456'  # 邮箱授权时获得的密码，非注册登录密码
 EMAIL_FROM = '美多商城<doomer_543d@163.com>'  # 发件人抬头
+
+# 邮箱验证链接
+EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'

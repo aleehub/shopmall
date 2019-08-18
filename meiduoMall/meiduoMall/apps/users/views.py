@@ -15,6 +15,8 @@ from django.conf import settings
 from meiduoMall.utils.views import LoginRequiredView
 from celery_tasks.email.tasks import send_verify_email
 
+from .utils import generate_email_verify_url
+
 # Create your views here.
 
 class RegisterView(View):
@@ -302,7 +304,9 @@ class EmailView(LoginRequiredView, View):
 
         # 发送邮件
 
-        verify_email = '邮箱验证链接'
+        # verify_email = '邮箱验证链接'
+        verify_url = generate_email_verify_url(user)
+
 
         # subject = "美多商城邮箱验证"
         # html_message = '<p>尊敬的用户您好！</p>' \
@@ -312,9 +316,7 @@ class EmailView(LoginRequiredView, View):
         #
         # send_mail(subject, "", settings.EMAIL_FROM, [email], html_message=html_message)
 
-        send_verify_email.delay(email, verify_email)
-
-
+        send_verify_email.delay(email, verify_url)
         # 响应 添加邮箱结果
 
         return JsonResponse({'code': RETCODE.OK, 'errmsg': "添加邮箱成功"})
