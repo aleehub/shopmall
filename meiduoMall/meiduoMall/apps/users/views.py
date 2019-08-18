@@ -360,3 +360,10 @@ class VerifyEmailView(LoginRequiredView, View):
         # 返回邮件验证结果
 
         return redirect(reverse('users:info'))
+
+
+class AddressView(LoginRequiredView, View):
+    """展示用户收货地址"""
+
+    def get(self, request):
+        return render(request, "user_center_site.html")

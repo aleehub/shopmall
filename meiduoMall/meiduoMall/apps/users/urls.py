@@ -50,6 +50,8 @@ urlpatterns = [
 
     url(r'^emails/$', views.EmailView.as_view(), name='emails'),  # 发送激活邮件
 
-    url(r'^emails/verification/$', views.VerifyEmailView.as_view(), name='emails'),  # 此时采用在类里继承父类验证类
+    url(r'^emails/verification/$', views.VerifyEmailView.as_view(), name='emails'),  # 验证激活邮件
+
+    url(r'^addresses/$', views.AddressView.as_view(), name='emails'),  # 个人中心，用户地址页面
 
 ]
