@@ -26,7 +26,7 @@ SECRET_KEY = '4&46e_c0omctt72p*zab#@a%*wci&^9t#y$dct(qx0p(0f&lin'
 DEBUG = True
 
 # 此项设置代表允许访问的域名地址
-ALLOWED_HOSTS = ['www.meiduo.com']
+ALLOWED_HOSTS = ['www.meiduo.site']
 
 
 # Application definition

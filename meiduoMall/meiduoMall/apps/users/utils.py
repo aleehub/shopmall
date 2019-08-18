@@ -23,7 +23,8 @@ def get_user_by_account(account):
 
             user = User.objects.get(username=account)
 
-    except User.DoseNotExist:
+    except User.DoesNotExist:
+
         return None
 
     else:
