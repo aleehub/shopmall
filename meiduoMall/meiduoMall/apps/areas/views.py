@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views import View
@@ -20,23 +21,30 @@ class AreasView(View):
         if not area_id:
             # 提供省份数据
 
-            try:
-                # 查询省份数据
+            # 先查询省份是否有缓存数据
+            province_list = cache.get('province_list')
 
-                province_model_list = Area.objects.filter(parent=None)
+            if not province_list:
 
-                # 序列化省份数据
+                try:
+                    # 查询省份数据
 
-                province_list = []
+                    province_model_list = Area.objects.filter(parent=None)
 
-                for province_model in province_model_list:
-                    province_list.append({'id': province_model.id, 'name': province_model.name})
+                    # 序列化省份数据
 
-            except Exception as e:
+                    province_list = []
 
-                logger.error(e)
+                    for province_model in province_model_list:
+                        province_list.append({'id': province_model.id, 'name': province_model.name})
 
-                return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '省份数据错误'})
+                except Exception as e:
+
+                    logger.error(e)
+
+                    return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '省份数据错误'})
+
+                cache.set('province_list', province_list, 3600)
 
             # 响应省份数据
             return JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok', 'province_list': province_list})
@@ -44,30 +52,39 @@ class AreasView(View):
         else:
             # 提供市或区数据
 
-            try:
+            # 读取市或区缓存数据
+            sub_data = cache.get("sub_area_" + area_id)
 
-                parent_model = Area.objects.get(id=area_id)
+            if not sub_data:
 
-                sub_model_list = parent_model.subs.all()
+                try:
 
-                # 序列化市区数据
+                    parent_model = Area.objects.get(id=area_id)
 
-                sub_list = []
+                    sub_model_list = parent_model.subs.all()
 
-                for sub_model in sub_model_list:
-                    sub_list.append({'id': sub_model.id, 'name': sub_model.name})
+                    # 序列化市区数据
 
-                sub_data = {
-                    'id': parent_model.id,  # 父级pk
-                    'name': parent_model.name,  # 父级name
-                    'subs': sub_list,  # 父级的子集
-                }
+                    sub_list = []
 
-            except Exception as e:
+                    for sub_model in sub_model_list:
+                        sub_list.append({'id': sub_model.id, 'name': sub_model.name})
 
-                logger.error(e)
+                    sub_data = {
+                        'id': parent_model.id,  # 父级pk
+                        'name': parent_model.name,  # 父级name
+                        'subs': sub_list,  # 父级的子集
+                    }
 
-                return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '市区数据错误'})
+                except Exception as e:
 
-            # 响应市区数据
+                    logger.error(e)
+
+                    return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '市区数据错误'})
+
+                # 存储市或区缓存数据
+
+                cache.set('sub_area_' + area_id, sub_data, 3600)
+
+                # 响应市区数据
             return JsonResponse({'code': RETCODE.OK, 'errmsg': 'ok', 'sub_data': sub_data})
