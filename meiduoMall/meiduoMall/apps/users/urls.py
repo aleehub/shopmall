@@ -56,9 +56,13 @@ urlpatterns = [
 
     url(r'^addresses/create/$', views.CreateAddressView.as_view(), name='newAddress'),  # 个人中心，新建收货地址
 
-    url(r'^addresses/(?P<address_id>\d+)/$', views.UpdateDestroyAddressView.as_view(), name='newAddress'),  # 个人中心，修改地址
+    url(r'^addresses/(?P<address_id>\d+)/$', views.UpdateDestroyAddressView.as_view(), name='updateAddress'),
+    # 个人中心，修改地址
 
-    url(r'^addresses/(?P<address_id>\d+)/default/$', views.DefaultAddressView.as_view(), name='newAddress'),
+    url(r'^addresses/(?P<address_id>\d+)/default/$', views.DefaultAddressView.as_view(), name='defaultAddress'),
     # 个人中心，设置默认地址
+
+    url(r'^addresses/(?P<address_id>\d+)/title/$', views.UpdateTitleAddressView.as_view(), name='updateAddressTitle'),
+    # 设置地址标题
 
 ]
