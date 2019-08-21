@@ -1,6 +1,6 @@
 from celery_tasks.main import celery_app
 from meiduoMall.libs.yuntongxun.sms import CCP
-from meiduoMall.apps.verifications import constants
+from meiduoMall.utils import constants
 
 
 # name : 异步任务别名

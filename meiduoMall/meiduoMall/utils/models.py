@@ -2,6 +2,8 @@ from django.db import models
 
 
 #  QQ登录成功后，我们需要将qq用户和美多商城用户关联到一起，方便下次QQ登录时使用，所以我们选择使用Mysql数据库进行存储
+
+
 # 为了给项目中模型类补充数据创建时间更新时间两个字段，我们需要定义模型基类。
 class BaseModel(models.Model):
     """为模型类补充字段"""

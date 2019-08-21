@@ -8,17 +8,13 @@ from meiduoMall.libs.captcha.captcha import captcha
 # 在django中使用redis需要使用django_radis 的工具包
 from django_redis import get_redis_connection
 
-from . import constants
+from meiduoMall.utils import constants
 
 from meiduoMall.utils.response_code import RETCODE
 
 import random
 
 import logging
-
-from celery_tasks.sms.tasks import ccp_send_sms_code
-
-from meiduoMall.libs.yuntongxun.sms import CCP
 
 logger = logging.getLogger()
 
