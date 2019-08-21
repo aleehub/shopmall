@@ -563,3 +563,20 @@ class UpdateDestroyAddressView(LoginRequiredView, View):
 
         # 响应更新地址结果
         return JsonResponse({'code': RETCODE.OK, 'errmsg': '更新地址成功', 'address': address_dict})
+
+    def delete(self, request, address_id):
+        """删除地址,实际没有删除数据，只是将删除字段置为真"""
+
+        try:
+            # 查询要删除的地址
+            address = Address.objects.get(id=address_id)
+
+            # 将地址逻辑删除设置为True
+            address.is_deleted = True
+            address.save()
+        except Exception as e:
+            logger.error(e)
+            return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '删除地址失败'})
+
+        # 响应删除地址结果
+        return JsonResponse({'code': RETCODE.OK, 'errmsg': '删除地址成功'})
