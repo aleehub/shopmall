@@ -68,5 +68,4 @@ urlpatterns = [
     url(r'^password/$', views.ChangePasswordView.as_view(), name='updatePassword'),
     # 设置地址标题
 
-
 ]
