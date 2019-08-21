@@ -65,4 +65,8 @@ urlpatterns = [
     url(r'^addresses/(?P<address_id>\d+)/title/$', views.UpdateTitleAddressView.as_view(), name='updateAddressTitle'),
     # 设置地址标题
 
+    url(r'^password/$', views.ChangePasswordView.as_view(), name='updatePassword'),
+    # 设置地址标题
+
+
 ]
