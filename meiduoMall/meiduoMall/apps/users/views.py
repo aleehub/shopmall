@@ -580,3 +580,23 @@ class UpdateDestroyAddressView(LoginRequiredView, View):
 
         # 响应删除地址结果
         return JsonResponse({'code': RETCODE.OK, 'errmsg': '删除地址成功'})
+
+
+class DefaultAddressView(LoginRequiredView, View):
+    """设置默认地址"""
+
+    def put(self, request, address_id):
+        """设置默认地址"""
+        try:
+            # 接收参数,查询地址
+            address = Address.objects.get(id=address_id)
+
+            # 设置地址为默认地址
+            request.user.default_address = address
+            request.user.save()
+        except Exception as e:
+            logger.error(e)
+            return JsonResponse({'code': RETCODE.DBERR, 'errmsg': '设置默认地址失败'})
+
+        # 响应设置默认地址结果
+        return JsonResponse({'code': RETCODE.OK, 'errmsg': '设置默认地址成功'})

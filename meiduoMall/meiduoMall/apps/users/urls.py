@@ -58,4 +58,7 @@ urlpatterns = [
 
     url(r'^addresses/(?P<address_id>\d+)/$', views.UpdateDestroyAddressView.as_view(), name='newAddress'),  # 个人中心，修改地址
 
+    url(r'^addresses/(?P<address_id>\d+)/default/$', views.DefaultAddressView.as_view(), name='newAddress'),
+    # 个人中心，设置默认地址
+
 ]
