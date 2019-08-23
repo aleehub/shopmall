@@ -46,14 +46,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    # 'meiduoMall.apps.users',  # 用户模块应用
     'users',  # 用户模型
-    'contents',  # 主内容页面
-    # 'verifications',  未迁移模型类 ，可先不用注册
     'oauth',  # QQ第三方登录应用
     'areas',  # 加载地址信息模块
     'goods',
+    'contents',
 ]
 
 
