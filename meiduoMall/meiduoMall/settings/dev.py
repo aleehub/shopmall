@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     # 'verifications',  未迁移模型类 ，可先不用注册
     'oauth',  # QQ第三方登录应用
     'areas',  # 加载地址信息模块
+    'goods',
 ]
 
 
