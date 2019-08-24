@@ -264,3 +264,11 @@ EMAIL_FROM = '美多商城<doomer_543d@163.com>'  # 发件人抬头
 
 # 邮箱验证链接
 EMAIL_VERIFY_URL = 'http://www.meiduo.site:8000/emails/verification/'
+
+# 指定远程图片文件的绝对路径的前半段
+# MEDIA_URL = 'http://192.168.14.91:8888/'
+# 修改Django的文件存储类
+
+DEFAULT_FILE_STORAGE = 'meiduoMall.utils.fastdfs.fdfs_storage.FastDFSStorage'
+
+FDFS_BASE_URL = 'http://image.meiduo.site:8888/'

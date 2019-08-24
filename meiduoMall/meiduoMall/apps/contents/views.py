@@ -20,6 +20,7 @@ class IndexView(View):
 
         context = {
             'categories': get_categories(),  # 商品分类数据
+
             'contents': contents  # 广告数据
         }
 
