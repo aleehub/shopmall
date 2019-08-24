@@ -10,12 +10,14 @@ from QQLoginTool.QQtool import OAuthQQ  #
 
 from django.conf import settings
 
+from carts.utils import merge_cart_cookie_to_redis
 from .models import OAuthQQUser
 from meiduoMall.utils.response_code import RETCODE
 import logging
 from django.contrib.auth import login
 from .utils import generate_openid_signature, check_openid_signature
 from users.models import User
+
 
 logger = logging.getLogger('django')
 
@@ -90,6 +92,8 @@ class QQAuthUserView(View):
 
             # 登录时用户名写入到cookie，有效期15天
             response.set_cookie('username', qq_user.username, max_age=3600 * 24 * 14)
+
+            merge_cart_cookie_to_redis(request, response)
 
             return response
 
@@ -171,5 +175,7 @@ class QQAuthUserView(View):
 
         # 登录时用户名写入到cookie，有效期15天
         response.set_cookie('username', user.username, max_age=3600 * 24 * 15)
+
+        merge_cart_cookie_to_redis(request, response)
 
         return response

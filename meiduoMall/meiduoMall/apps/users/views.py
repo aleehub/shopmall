@@ -8,6 +8,7 @@ from django.http import HttpResponseForbidden, JsonResponse, HttpResponseBadRequ
 from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse
 
+from carts.utils import merge_cart_cookie_to_redis
 from meiduoMall.utils import constants
 from meiduoMall.utils.response_code import RETCODE
 from .models import User, Address
@@ -18,7 +19,6 @@ from meiduoMall.utils.views import LoginRequiredView
 from celery_tasks.email.tasks import send_verify_email
 
 from .utils import generate_email_verify_url, check_email_verify_url
-
 from django_redis import get_redis_connection
 
 from goods.models import *
@@ -110,6 +110,7 @@ class RegisterView(View):
         response.set_cookie('username', user.username, max_age=settings.SESSION_COOKIE_AGE)
         # merge_cart_cookie_to_redis(request, response)
         return response
+
 
 class UsernameCountView(View):
     """查询用户名重复识视图"""
@@ -224,6 +225,8 @@ class LoginView(View):
         # 登录时用户名写入cookie，有效期14天
         response.set_cookie('username', user.username,
                             max_age=(None if remembered is None else settings.SESSION_COOKIE_AGE))
+
+        merge_cart_cookie_to_redis(request, response)
 
         return response
 

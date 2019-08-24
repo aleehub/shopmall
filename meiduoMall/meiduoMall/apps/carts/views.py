@@ -1,91 +1,416 @@
-import base64
-import json
-import pickle
-
-from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render
-from django_redis import get_redis_connection
-from goods.models import *
-
 from django.views import View
+import json, pickle, base64
+from django import http
+from django_redis import get_redis_connection
 
-from meiduoMall.utils import constants
+from goods.models import SKU
 from meiduoMall.utils.response_code import RETCODE
 
 
 class CartsView(View):
-    """购物车管理"""
+    """购物车增删改查"""
 
     def post(self, request):
-        """添加购物车"""
+        """购物车新增"""
 
-        # 接收和校验参数
-        def post(self, request):
-            """添加购物车"""
-            # 接收参数
-            json_dict = json.loads(request.body.decode())
-            sku_id = json_dict.get('sku_id')
-            count = json_dict.get('count')
-            selected = json_dict.get('selected', True)
+        # 1.接收请求体中非表单
+        json_dict = json.loads(request.body.decode())
+        sku_id = json_dict.get('sku_id')
+        count = json_dict.get('count')
+        selected = json_dict.get('selected', True)
 
-            # 判断参数是否齐全
-            if not all([sku_id, count]):
-                return HttpResponseForbidden('缺少必传参数')
-            # 判断sku_id是否存在
-            try:
-                SKU.objects.get(id=sku_id)
-            except SKU.DoesNotExist:
-                return HttpResponseForbidden('商品不存在')
-            # 判断count是否为数字
-            try:
-                count = int(count)
-            except Exception:
-                return HttpResponseForbidden('参数count有误')
-            # 判断selected是否为bool值
+        # 2.校验
+        try:
+            sku = SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            return http.HttpResponseForbidden('sku_id无效')
+
+        try:
+            count = int(count)
+        except Exception:
+            return http.HttpResponseForbidden('数据类型有误')
+
+        if isinstance(selected, bool) is False:
+            return http.HttpResponseForbidden('数据类型有误')
+
+        # 3.判断用户是否登录
+        user = request.user
+        if user.is_authenticated:
+            # 登录用户操作redis购物车
+            """
+            hash: {sku_id_1: 1, sku_id_2: 1}
+            set:  {sku_id_1}
+            """
+
+            # 创建redis连接对象
+            redis_conn = get_redis_connection('carts')
+            pl = redis_conn.pipeline()
+            # hincbry 如果sku_id已存在,就会自动做增量,不存在就是新增
+            pl.hincrby('cart_%s' % user.id, sku_id, count)
+            # 判断当前是否勾选,勾选就把sku_id添加到set sadd
             if selected:
-                if not isinstance(selected, bool):
-                    return HttpResponseForbidden('参数selected有误')
+                pl.sadd('selected_%s' % user.id, sku_id)
 
-            # 判断用户是否登录
-            user = request.user
-            if user.is_authenticated:
-                # 用户已登录，操作redis购物车
-                # 用户已登录，操作redis购物车
-                redis_conn = get_redis_connection('carts')
-                pl = redis_conn.pipeline()
-                # 新增购物车数据
-                pl.hincrby('carts_%s' % user.id, sku_id, count)
-                # 新增选中的状态
-                if selected:
-                    pl.sadd('selected_%s' % user.id, sku_id)
-                # 执行管道
-                pl.execute()
-                # 响应结果
-                return JsonResponse({'code': RETCODE.OK, 'errmsg': '添加购物车成功'})
-            else:
-                # 用户未登录，操作cookie购物车
-                cart_str = request.COOKIES.get('carts')
-                # 如果用户操作过cookie购物车
-                if cart_str:
-                    # 将cart_str转成bytes,再将bytes转成base64的bytes,最后将bytes转字典
-                    cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
-                else:  # 用户从没有操作过cookie购物车
-                    cart_dict = {}
+            pl.execute()  # 执行管道
 
-                # 判断要加入购物车的商品是否已经在购物车中,如有相同商品，累加求和，反之，直接赋值
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加购物车成功'})
+        else:
+            # 未登录用户操作cookie购物车
+            # 先尝试从cookie中获取购物车数据
+            cart_str = request.COOKIES.get('carts')
+            """
+            {
+                'sku_id_1': {'count': 1, 'selected': True},
+                'sku_id_12': {'count': 1, 'selected': True},
+            }
+            """
+            # 判断是否获取到cookie购物车数据
+            if cart_str:
+                # 如果取到将cookie 购物车数据要将str 转换回字典
+                cart_str_bytes = cart_str.encode()
+                cart_bytes = base64.b64decode(cart_str_bytes)
+                cart_dict = pickle.loads(cart_bytes)
+                # 判断当前要添加的商品是否以前已经添加过,如果添加过应该累加它的count
                 if sku_id in cart_dict:
-                    # 累加求和
                     origin_count = cart_dict[sku_id]['count']
                     count += origin_count
-                cart_dict[sku_id] = {
-                    'count': count,
-                    'selected': selected
-                }
-                # 将字典转成bytes,再将bytes转成base64的bytes,最后将bytes转字符串
-                cookie_cart_str = base64.b64encode(pickle.dumps(cart_dict)).decode()
 
-                # 创建响应对象
-                response = JsonResponse({'code': RETCODE.OK, 'errmsg': '添加购物车成功'})
-                # 响应结果并将购物车数据写入到cookie
-                response.set_cookie('carts', cookie_cart_str, max_age=constants.CARTS_COOKIE_EXPIRES)
+                # cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
+            else:
+                # 如果还没有cookie购物车数据  定义一个新字典用来添加购物车数据
+                cart_dict = {}
+
+            # 添加或修改
+            cart_dict[sku_id] = {
+                'count': count,
+                'selected': selected
+            }
+            # 将字典转换回字符串
+            cart_bytes = pickle.dumps(cart_dict)
+            cart_str_bytes = base64.b64encode(cart_bytes)
+            cart_str = cart_str_bytes.decode()
+
+            # 设置cookie
+            response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': '添加购物车成功'})
+            response.set_cookie('carts', cart_str)
+            # 响应
+            return response
+
+    def get(self, request):
+        """购物车查询"""
+        user = request.user
+        if user.is_authenticated:
+            # 登录用户从redis获取购物车数据
+            """
+            hash: {sku_id_1: 1, sku_id_2: 1}
+            set:  {sku_id_1}
+            """
+            # 创建redis连接对象
+            redis_conn = get_redis_connection('carts')
+            # 获取hash数据
+            redis_carts = redis_conn.hgetall('cart_%s' % user.id)
+            # 获取set数据
+            selected_ids = redis_conn.smembers('selected_%s' % user.id)
+            # 将redis购物车数据格式转换成和cookie一致
+            cart_dict = {}  # 用来包装redis购物车的所有数据
+            for sku_id_bytes in redis_carts:
+                cart_dict[int(sku_id_bytes)] = {
+                    'count': int(redis_carts[sku_id_bytes]),
+                    'selected': sku_id_bytes in selected_ids
+                }
+
+        else:
+            # 未登录用户从cookie获取购物车数据
+            """
+            {
+                'sku_id_1': {'count': 1, 'selected': True},
+                'sku_id_12': {'count': 1, 'selected': True},
+            }
+            """
+            # 获取cookie中购物车数据
+            cart_str = request.COOKIES.get('carts')
+            # 判断是否获取到
+            if cart_str:
+                # 将cart_str 转换成字典
+                cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
+            else:
+                return render(request, 'cart.html')
+
+        # 查询并包装购物车展示时所需要渲染的数据
+        sku_qs = SKU.objects.filter(id__in=cart_dict.keys())
+        # 定义一个用来包装所有购物车字典的列表
+        sku_list = []
+        # 遍历sku_qs 查询集,进行模型转字典
+        for sku_model in sku_qs:
+            # 获取指定商品的count
+            count = cart_dict[sku_model.id]['count']
+            sku_list.append({
+                'id': sku_model.id,
+                'name': sku_model.name,
+                'default_image_url': sku_model.default_image.url,
+                'price': str(sku_model.price),  # 转成str类型是为了方便js中进行解析
+                'count': count,
+                'selected': str(cart_dict[sku_model.id]['selected']),
+                'amount': str(sku_model.price * count)
+            })
+
+        context = {
+            'cart_skus': sku_list
+        }
+        return render(request, 'cart.html', context)
+
+    def put(self, request):
+        """购物车修改"""
+        # 1.接收请求体中非表单
+        json_dict = json.loads(request.body.decode())
+        sku_id = json_dict.get('sku_id')
+        count = json_dict.get('count')
+        selected = json_dict.get('selected')
+
+        # 2.校验
+        if all([sku_id, count]) is False:
+            return http.HttpResponseForbidden('缺少必传参数')
+
+        try:
+            sku = SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            return http.HttpResponseForbidden('sku_id无效')
+
+        try:
+            count = int(count)
+        except Exception:
+            return http.HttpResponseForbidden('数据类型有误')
+
+        if isinstance(selected, bool) is False:
+            return http.HttpResponseForbidden('数据类型有误')
+
+        # 获取本次修改的商品的sku模型
+        sku_model = SKU.objects.get(id=sku_id)
+        cart_sku = {
+            'id': sku_model.id,
+            'name': sku_model.name,
+            'default_image_url': sku_model.default_image.url,
+            'price': str(sku_model.price),  # 转成str类型是为了方便js中进行解析
+            'count': count,
+            'selected': selected,
+            'amount': str(sku_model.price * count)
+        }
+        response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': '修改购物车成功', 'cart_sku': cart_sku})
+
+        # 判断登录
+        user = request.user
+
+        if user.is_authenticated:
+            # 登录用户修改redis
+            # 创建redis连接对象
+            redis_conn = get_redis_connection('carts')
+            pl = redis_conn.pipeline()
+            # 修改hash中指定key 对应 count
+            pl.hset('cart_%s' % user.id, sku_id, count)
+            # 判断当前商品是要勾选还是不勾选
+            if selected:
+                # 勾选就将当前sku_id添加到set
+                pl.sadd('selected_%s' % user.id, sku_id)
+
+            else:
+                # 不勾选就将sku_id 从set 移除
+                pl.srem('selected_%s' % user.id, sku_id)
+
+            pl.execute()
+
+        else:
+            # 未登录用户修改cookie
+
+            # 获取cookie购物车数据
+            cart_str = request.COOKIES.get('carts')
+            # 判断是否获取到cookie购物车数据
+            if cart_str:
+                # 将cart_str 转换成字典
+                cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
+
+            else:
+                # 如果没有获取到cookie购物车数据提前响应
+                return http.JsonResponse({'code': RETCODE.NODATAERR, 'errmsg': '没有获取到数据'})
+            # 覆盖cookie大字典中指定键值对
+            cart_dict[sku_id] = {
+                'count': count,
+                'selected': selected
+            }
+            # 将字典转回字符串
+            cart_str = base64.b64encode(pickle.dumps(cart_dict)).decode()
+            # # 创建响应对象
+            # response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': '修改购物车成功'})
+            # 设置cookie
+            response.set_cookie('carts', cart_str)
+            # 响应
+        return response
+
+    def delete(self, request):
+        """购物车删除"""
+        # 1.接收请求体中非表单
+        json_dict = json.loads(request.body.decode())
+        sku_id = json_dict.get('sku_id')
+        # 2.校验
+        try:
+            sku = SKU.objects.get(id=sku_id)
+        except SKU.DoesNotExist:
+            return http.HttpResponseForbidden('sku_id无效')
+
+        # 获取user
+        user = request.user
+        # 判断登录
+        if user.is_authenticated:
+            # 登录操作redis
+            # 创建redis连接对象
+            redis_conn = get_redis_connection('carts')
+            # 创建管道
+            pl = redis_conn.pipeline()
+            # 删除hash数据
+            pl.hdel('cart_%s' % user.id, sku_id)
+            # 删除set
+            pl.srem('selected_%s' % user.id, sku_id)
+            # 执行管道
+            pl.execute()
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '删除购物车数据成功'})
+        else:
+            # 未登录用户cookie
+            # 获取cookie购物车数据
+            cart_str = request.COOKIES.get('carts')
+            # 判断是否获取到cookie
+            if cart_str:
+                # cart_str 转 cart_dict
+                cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
+            else:
+                # 提前响应
+                return http.JsonResponse({'code': RETCODE.NODATAERR, 'errmsg': '没有获取到数据'})
+
+            # 判断当前要删除的sku_id在cookie大字典中是否存在
+            if sku_id in cart_dict:
+                # del 删他字典中指定的键值对
+                del cart_dict[sku_id]
+
+            response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': '删除购物车数据成功'})
+            # 判断cookie购物车字典中否已经空了
+            if not cart_dict:
+                # 如果cookie购物车数据已经删除干净了,直接将浏览器上的cookie购物车数据删除
+                response.delete_cookie('carts')
                 return response
+
+            # 将cart_dict  转 cart_str {}
+            cart_str = base64.b64encode(pickle.dumps(cart_dict)).decode()
+
+            # 设置cookie
+            response.set_cookie('carts', cart_str)
+            # 响应
+            return response
+
+
+class CartsSelectedAllView(View):
+    """购物车全选"""
+
+    def put(self, request):
+
+        # 接收请求体数据
+        json_dict = json.loads(request.body.decode())
+        selected = json_dict.get('selected')
+        # 校验
+        if isinstance(selected, bool) is False:
+            return http.HttpResponseForbidden('数据类型有误')
+
+        user = request.user
+        if user.is_authenticated:
+            # 登录用户操作redis
+            redis_conn = get_redis_connection('carts')
+            # 判断是全选还是取消全选
+            if selected:
+                # 全选: 将hash中所有sku_id 添加到set
+                redis_carts = redis_conn.hgetall('cart_%s' % user.id)
+                sku_ids = redis_carts.keys()
+                redis_conn.sadd('selected_%s' % user.id, *sku_ids)
+            else:
+                # 取消全选: 将set集合直接删除
+                redis_conn.delete('selected_%s' % user.id)
+            # 响应
+            return http.JsonResponse({'code': RETCODE.OK, 'errmsg': '全选成功'})
+        else:
+            # 未登录用户操作cookie
+            cart_str = request.COOKIES.get('carts')
+            if cart_str:
+                cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
+            else:
+                return http.JsonResponse({'code': RETCODE.NODATAERR, 'errmsg': '没有获取到数据'})
+            # 遍历购物车大字典,
+            for sku_id in cart_dict:
+                # 将里面的每个小字典的selected 改为True / False
+                cart_dict[sku_id]['selected'] = selected
+
+            cart_str = base64.b64encode(pickle.dumps(cart_dict)).decode()
+            response = http.JsonResponse({'code': RETCODE.OK, 'errmsg': '全选成功'})
+            response.set_cookie('carts', cart_str)
+            return response
+
+
+class CartsSimpleView(View):
+
+    def get(self, request):
+        user = request.user
+        if user.is_authenticated:
+            # 登录用户从redis获取购物车数据
+            """
+            hash: {sku_id_1: 1, sku_id_2: 1}
+            set:  {sku_id_1}
+            """
+            # 创建redis连接对象
+            redis_conn = get_redis_connection('carts')
+            # 获取hash数据
+            redis_carts = redis_conn.hgetall('cart_%s' % user.id)
+            # 获取set数据
+            selected_ids = redis_conn.smembers('selected_%s' % user.id)
+            # 将redis购物车数据格式转换成和cookie一致
+            cart_dict = {}  # 用来包装redis购物车的所有数据
+            for sku_id_bytes in redis_carts:
+                cart_dict[int(sku_id_bytes)] = {
+                    'count': int(redis_carts[sku_id_bytes]),
+                    'selected': sku_id_bytes in selected_ids
+                }
+
+        else:
+            # 未登录用户从cookie获取购物车数据
+            """
+            {
+                'sku_id_1': {'count': 1, 'selected': True},
+                'sku_id_12': {'count': 1, 'selected': True},
+            }
+            """
+            # 获取cookie中购物车数据
+            cart_str = request.COOKIES.get('carts')
+            # 判断是否获取到
+            if cart_str:
+                # 将cart_str 转换成字典
+                cart_dict = pickle.loads(base64.b64decode(cart_str.encode()))
+            else:
+                return render(request, 'cart.html')
+
+        # 查询并包装购物车展示时所需要渲染的数据
+        sku_qs = SKU.objects.filter(id__in=cart_dict.keys())
+        # 定义一个用来包装所有购物车字典的列表
+        sku_list = []
+        # 遍历sku_qs 查询集,进行模型转字典
+        for sku_model in sku_qs:
+            # 获取指定商品的count
+            count = cart_dict[sku_model.id]['count']
+            sku_list.append({
+                'id': sku_model.id,
+                'name': sku_model.name,
+                'default_image_url': sku_model.default_image.url,
+                'count': count
+            })
+
+        return http.JsonResponse({'code': RETCODE.OK, 'errmsg': 'OK', 'cart_skus': sku_list})
+
+# from decimal import Decimal
+#
+# a = Decimal('0.1')
+# b = Decimal('0.2')
+# print(a + b)
