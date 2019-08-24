@@ -68,4 +68,6 @@ urlpatterns = [
     url(r'^password/$', views.ChangePasswordView.as_view(), name='updatePassword'),
     # 设置地址标题
 
+    url(r'^browse_histories/$', views.UserBrowseHistory.as_view(), name='userBrowseHistory'),
+    # 用户商品浏览记录
 ]
