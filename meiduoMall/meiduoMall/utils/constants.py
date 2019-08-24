@@ -13,3 +13,6 @@ SEND_SMS_CODE_INTERVAL = 60
 
 # 用户可保存最大地址数
 USER_ADDRESS_COUNTS_LIMIT = 20
+
+# 未登录用户购物车cookies过期值
+CARTS_COOKIE_EXPIRES = 3600 * 24 * 15

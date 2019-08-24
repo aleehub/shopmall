@@ -15,7 +15,6 @@ import os, sys
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
@@ -27,7 +26,6 @@ DEBUG = True
 
 # 此项设置代表允许访问的域名地址
 ALLOWED_HOSTS = ['www.meiduo.site']
-
 
 # Application definition
 
@@ -51,8 +49,8 @@ INSTALLED_APPS = [
     'areas',  # 加载地址信息模块
     'goods',
     'contents',
+    'carts',
 ]
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -103,7 +101,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'meiduoMall.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
@@ -133,7 +130,7 @@ CACHES = {
             "CLIENT_CLASS": 'django_redis.client.DefaultClient',
         }
     },
-    "session": {   #session 状态保持的redis配置项 采用1号数据库
+    "session": {  # session 状态保持的redis配置项 采用1号数据库
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://127.0.0.1:6379/1",
         "OPTIONS": {
@@ -155,6 +152,13 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     },
+    "carts": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/4",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
 }
 
 # 修改session存储机制 使用redis保存
@@ -162,7 +166,6 @@ SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 # 将session的默认配置改成session配置
 SESSION_CACHE_ALIAS = "session"
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -182,7 +185,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
@@ -196,7 +198,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
@@ -208,7 +209,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,  # 是否禁用已经存在的日志器
-    'formatters': {     # 日执行新显示的格式
+    'formatters': {  # 日执行新显示的格式
         'verbose': {
             'format': '%(levelname)s %(asctime)s %(module)s %(lineno)d %(message)s'
         },
@@ -216,35 +217,34 @@ LOGGING = {
             'format': '%(levelname)s %(module)s %(lineno)d %(message)s'
         },
     },
-    'filters': {    # 对日志进行过滤
-        'require_debug_true': { # django在debug模式下才输出日志
+    'filters': {  # 对日志进行过滤
+        'require_debug_true': {  # django在debug模式下才输出日志
             '()': "django.utils.log.RequireDebugTrue",
         },
     },
-    "handlers": {   # 日志处理方法
-        "console": {    # 在终端中输出日志
+    "handlers": {  # 日志处理方法
+        "console": {  # 在终端中输出日志
             'level': "INFO",
             'filters': ['require_debug_true'],
             'class': 'logging.StreamHandler',
             'formatter': "simple"
         },
-        'file': {       # 在文件中输出日志
-                'level': 'INFO',
-                'class': 'logging.handlers.RotatingFileHandler',
-                'filename': os.path.join(os.path.dirname(BASE_DIR), 'logs/meiduo.log'),
-                'maxBytes': 300*1024*1024,
-                'backupCount': 10,
-                'formatter': 'verbose'
+        'file': {  # 在文件中输出日志
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(os.path.dirname(BASE_DIR), 'logs/meiduo.log'),
+            'maxBytes': 300 * 1024 * 1024,
+            'backupCount': 10,
+            'formatter': 'verbose'
         },
     },
-    'loggers': {    # 日志器
-        'django': { # 定义了一个名为djangod的日志器
-            'handlers': ['console', 'file'],    # 可以向终端和日志中同时输出日志
-            'propagate': True,      # 是否进行传递日志
-            'level': "INFO",        # 日志器接收的最低日志级别
+    'loggers': {  # 日志器
+        'django': {  # 定义了一个名为djangod的日志器
+            'handlers': ['console', 'file'],  # 可以向终端和日志中同时输出日志
+            'propagate': True,  # 是否进行传递日志
+            'level': "INFO",  # 日志器接收的最低日志级别
         },
     }
-
 
 }
 
